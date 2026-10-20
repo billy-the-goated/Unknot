@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timesheet | Easily Uncomplicated</title>
+<meta name="description" content="Timesheet: log your hours by hand or with a timer. Free, no ads, saved on your device.">
+<meta name="theme-color" content="#1E4BD2">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='28' fill='%231E4BD2'/%3E%3Cpath d='M18 76C14 42 52 38 48 62C45 80 26 76 34 62C40 52 58 56 64 60L84 60' fill='none' stroke='%23fff' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='97' cy='60' r='10' fill='%23E5383B'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#1E4BD2;--blue-dark:#1740B3;--red:#E5383B;--red-dark:#C62428;--navy:#0B1B4D;--soft:#F1F4FB;--line:#D9E0F2;--mut:#4A5578}
+*{box-sizing:border-box}
+body{margin:0;font:17px/1.5 "Outfit","Helvetica Neue",Arial,sans-serif;color:var(--navy);background:#fff;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px 60px}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+header a{display:flex;align-items:center;gap:10px;color:var(--navy);text-decoration:none;font-weight:600}
+header svg{width:34px;height:34px}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:12px;padding:12px 22px;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--blue-dark)}
+.btn.stop{background:var(--red)}.btn.stop:hover{background:var(--red-dark)}
+.ghost{background:none;border:1.5px solid var(--line);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:500}
+.ghost:hover{border-color:var(--blue)}
+.link{background:none;border:0;padding:0;color:var(--blue);cursor:pointer;text-decoration:underline;font-size:.92rem}
+select,input,textarea{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;width:100%}
+label{display:block;margin:12px 0 0;font-weight:500;font-size:.95rem}
+label input,label select{margin-top:4px;font-weight:400}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--soft);border-radius:18px;padding:20px}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-weight:600;cursor:pointer;color:var(--mut)}
+.seg button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.help{margin:8px 0 0;color:var(--mut);font-size:.9rem}
+#err{color:var(--red-dark);min-height:1.4em;margin:8px 0 0}
+.row{display:flex;gap:8px;margin-top:8px}
+.clock{font-size:3rem;font-weight:600;letter-spacing:-.02em;text-align:center;margin:18px 0 0;font-variant-numeric:tabular-nums;line-height:1.1}
+.tc{text-align:center}
+.mut{color:var(--mut)}
+h2{font-size:1.25rem;margin:32px 0 10px}
+.wk{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wk b{flex:1;min-width:150px;text-align:center}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.stat{background:var(--soft);border-radius:14px;padding:14px}
+.stat small{display:block;color:var(--mut);font-size:.85rem}
+.stat div{font-size:1.5rem;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.bars{display:flex;align-items:flex-end;gap:8px;height:96px;margin-top:6px}
+.bar{flex:1;background:var(--blue);border-radius:6px 6px 0 0;min-height:3px}
+.bar.z{background:var(--line)}
+.days{display:flex;gap:8px;font-size:.8rem;color:var(--mut);text-align:center;margin-top:4px}
+.days span{flex:1}.days .td{color:var(--navy);font-weight:600}
+ul{list-style:none;margin:0;padding:0}
+.pj li{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line)}
+#hist li{display:flex;gap:10px;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line)}
+#hist small{display:block;color:var(--mut)}
+.amt{font-weight:600;white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
+.acts button{border:0;background:none;color:var(--blue);cursor:pointer;padding:2px 0 0;margin-right:10px;font-size:.9rem}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.foot{color:var(--mut);font-size:.88rem;margin-top:34px}
+[hidden]{display:none!important}
+@media (max-width:420px){.clock{font-size:2.6rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<a href="index.html"><svg viewBox="0 0 120 120" aria-hidden="true"><rect width="120" height="120" rx="30" fill="#1E4BD2"/><path d="M20 76C16 42 54 38 50 62C47 80 28 76 36 62C42 52 60 56 66 60L86 60" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="99" cy="60" r="10" fill="#E5383B"/></svg>Timesheet</a>
+<a href="index.html">Easily Uncomplicated</a>
+</header>
+
+<main>
+<section class="card" aria-label="Log time">
+<div class="seg" role="group" aria-label="How to log time">
+<button type="button" id="tabAdd" aria-pressed="true">Add time</button>
+<button type="button" id="tabTimer" aria-pressed="false">Timer</button>
+</div>
+
+<form id="fAdd" novalidate>
+<label>What was it<input id="what" maxlength="80" placeholder="e.g. Drive to client"></label>
+<label>Project (optional)<input id="proj" list="projs" maxlength="40" placeholder="e.g. Client A"></label>
+<datalist id="projs"></datalist>
+<div class="two">
+<label>Date<input id="date" type="date"></label>
+<label id="lenL">Length<input id="len" placeholder="1h 20m" autocomplete="off"></label>
+</div>
+<div class="two" id="seL" hidden>
+<label>From<input id="from" type="time"></label>
+<label>To<input id="to" type="time"></label>
+</div>
+<p class="help"><button type="button" class="link" id="mode">Use start and end time instead</button> &middot; Try 1h 20m, 1:20 or 45m.</p>
+<p id="err" role="alert"></p>
+<div class="row"><button class="btn" type="submit" id="saveBtn">Save entry</button><button type="button" class="ghost" id="cancelEdit" hidden>Cancel</button></div>
+</form>
+
+<div id="pTimer" hidden>
+<label>What are you working on (optional)<input id="twhat" maxlength="80" placeholder="e.g. Homepage layout"></label>
+<label>Project (optional)<input id="tproj" list="projs" maxlength="40" placeholder="e.g. Website redesign"></label>
+<div class="clock" id="clock">00:00:00</div>
+<p class="tc mut" id="tstart" style="margin:4px 0 14px">Press start when you begin.</p>
+<div class="tc"><button class="btn" id="tbtn" type="button">Start</button> <button class="ghost" id="tdisc" type="button" hidden>Discard</button></div>
+</div>
+</section>
+
+<h2>Stats</h2>
+<div class="wk">
+<button class="ghost" id="prev" aria-label="Previous week">&larr;</button>
+<b id="wlab"></b>
+<button class="ghost" id="next" aria-label="Next week">&rarr;</button>
+<button class="ghost" id="thisw">This week</button>
+</div>
+<div class="stats">
+<div class="stat"><small>Total</small><div id="sTot">0h 00m</div></div>
+<div class="stat"><small>Daily average</small><div id="sAvg">0h 00m</div></div>
+<div class="stat"><small>Busiest day</small><div id="sBus">None</div></div>
+<div class="stat"><small>Top project</small><div id="sTop" style="font-size:1.2rem">None</div></div>
+</div>
+<div class="bars" id="bars" aria-hidden="true"></div>
+<div class="days" id="days" aria-hidden="true"></div>
+<ul class="pj" id="pj" style="margin-top:14px"></ul>
+
+<h2>History</h2>
+<ul id="hist"></ul>
+
+<div class="tools">
+<button class="ghost" id="exp" type="button">Export CSV</button>
+<button class="ghost" id="copy" type="button">Copy week as text</button>
+</div>
+<p class="foot">Everything is saved in this browser only. Clearing your browser data deletes it, so export your CSV now and then.</p>
+</main>
+</div>
+
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var K='eu.timesheet.v1',S;
+try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
+if(!S||!S.entries)S={entries:[],timer:null};
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){alert('Could not save. Your browser may be blocking storage.')}}
+var uid=function(){return Math.random().toString(36).slice(2,9)};
+var DAY=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+var DAYF=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+function ymd(d){return d.toLocaleDateString('en-CA')}
+function pd(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+function wstart(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+function addDays(d,n){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()+n);return x}
+function fmt(m){var h=Math.floor(m/60),r=m%60;return h+'h '+(r<10?'0':'')+r+'m'}
+function short(s){return pd(s).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}
+function tmin(s){var p=(s||'').split(':');return p.length===2?(+p[0])*60+(+p[1]):NaN}
+
+function parseLen(s){
+s=String(s).trim().toLowerCase().replace(',','.');
+if(!s)return NaN;
+var m=s.match(/^(\d+):(\d{1,2})$/);
+if(m)return (+m[1])*60+(+m[2]);
+m=s.match(/^(?:(\d+(?:\.\d+)?)\s*h(?:ours?|rs?)?)?\s*(?:(\d+)\s*m(?:in(?:ute)?s?)?)?$/);
+if(m&&(m[1]||m[2]))return Math.round((parseFloat(m[1])||0)*60+(+m[2]||0));
+if(/^\d+\.\d+$/.test(s))return Math.round(parseFloat(s)*60);
+if(/^\d+$/.test(s))return +s;
+return NaN}
+
+var wk=wstart(new Date()),editId=null,useSE=false;
+
+/* tabs */
+function showTab(t){
+var add=t==='add';
+$('#fAdd').hidden=!add;$('#pTimer').hidden=add;
+$('#tabAdd').setAttribute('aria-pressed',add);$('#tabTimer').setAttribute('aria-pressed',!add)}
+$('#tabAdd').onclick=function(){showTab('add')};
+$('#tabTimer').onclick=function(){showTab('timer')};
+
+/* add time form */
+function setMode(on){useSE=on;$('#seL').hidden=!on;$('#lenL').hidden=on;$('#mode').textContent=on?'Use a length instead':'Use start and end time instead'}
+$('#mode').onclick=function(){setMode(!useSE)};
+function resetForm(){editId=null;$('#what').value='';$('#len').value='';$('#from').value='';$('#to').value='';$('#err').textContent='';$('#saveBtn').textContent='Save entry';$('#cancelEdit').hidden=true;setMode(false)}
+$('#cancelEdit').onclick=function(){resetForm()};
+$('#date').value=ymd(new Date());
+
+$('#fAdd').onsubmit=function(ev){
+ev.preventDefault();
+var err=function(m){$('#err').textContent=m};
+var date=$('#date').value;
+if(!date)return err('Pick a date.');
+var mins;
+if(useSE){
+var a=tmin($('#from').value),b=tmin($('#to').value);
+if(isNaN(a)||isNaN(b))return err('Add both a start and an end time.');
+mins=b-a;if(mins<=0)mins+=1440}
+else{mins=parseLen($('#len').value);
+if(isNaN(mins)||mins<=0)return err('Enter a length like 1h 20m, 1:20 or 45m.')}
+if(mins>1440)return err('An entry can\u2019t be longer than 24 hours.');
+var e={id:editId||uid(),date:date,what:$('#what').value.trim(),proj:$('#proj').value.trim(),min:mins,source:'manual',ts:Date.now()};
+if(useSE){e.from=$('#from').value;e.to=$('#to').value}
+if(editId){var old=S.entries.filter(function(x){return x.id===editId})[0];if(old)e.source=old.source||'manual';S.entries=S.entries.map(function(x){return x.id===editId?e:x})}
+else S.entries.push(e);
+save();wk=wstart(pd(date));
+var keepDate=date,keepProj=$('#proj').value;
+resetForm();$('#date').value=keepDate;$('#proj').value=keepProj;
+render()};
+
+/* timer */
+function tick(){
+if(!S.timer){$('#clock').textContent='00:00:00';return}
+var s=Math.max(0,Math.floor((Date.now()-S.timer.start)/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60,p=function(n){return (n<10?'0':'')+n};
+$('#clock').textContent=p(h)+':'+p(m)+':'+p(r)}
+function renderTimer(){
+var on=!!S.timer;
+$('#tbtn').textContent=on?'Stop and save':'Start';
+$('#tbtn').className='btn'+(on?' stop':'');
+$('#tdisc').hidden=!on;
+$('#twhat').disabled=$('#tproj').disabled=on;
+if(on){$('#twhat').value=S.timer.what||'';$('#tproj').value=S.timer.proj||'';
+$('#tstart').textContent='Started '+new Date(S.timer.start).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' on '+short(ymd(new Date(S.timer.start)))+'.'}
+else $('#tstart').textContent='Press start when you begin.';
+tick()}
+$('#tbtn').onclick=function(){
+if(!S.timer){S.timer={start:Date.now(),what:$('#twhat').value.trim(),proj:$('#tproj').value.trim()};save();renderTimer();return}
+var st=new Date(S.timer.start),mins=Math.max(1,Math.round((Date.now()-S.timer.start)/60000));
+S.entries.push({id:uid(),date:ymd(st),what:S.timer.what,proj:S.timer.proj,min:mins,source:'timer',ts:Date.now()});
+S.timer=null;$('#twhat').value='';
+save();wk=wstart(st);renderTimer();render()};
+$('#tdisc').onclick=function(){if(confirm('Discard the running timer without saving it?')){S.timer=null;save();renderTimer()}};
+setInterval(tick,1000);
+
+/* week navigation */
+$('#prev').onclick=function(){wk=addDays(wk,-7);render()};
+$('#next').onclick=function(){wk=addDays(wk,7);render()};
+$('#thisw').onclick=function(){wk=wstart(new Date());render()};
+
+function weekEntries(){var a=ymd(wk),b=ymd(addDays(wk,6));return S.entries.filter(function(e){return e.date>=a&&e.date<=b})}
+function pname(e){return e.proj||'No project'}
+
+function render(){
+var projs={};S.entries.forEach(function(e){if(e.proj)projs[e.proj]=1});
+$('#projs').innerHTML=Object.keys(projs).sort().map(function(p){return '<option value="'+esc(p)+'">'}).join('');
+var we=addDays(wk,6),o={day:'numeric',month:'short'};
+$('#wlab').textContent=wk.toLocaleDateString('en-GB',o)+' to '+we.toLocaleDateString('en-GB',o)+' '+we.getFullYear();
+var list=weekEntries(),days=[0,0,0,0,0,0,0],pj={},total=0;
+list.forEach(function(e){var i=Math.round((pd(e.date)-wk)/86400000);days[i]+=e.min;total+=e.min;pj[pname(e)]=(pj[pname(e)]||0)+e.min});
+var active=days.filter(function(d){return d>0}).length,max=Math.max.apply(null,days);
+$('#sTot').textContent=fmt(total);
+$('#sAvg').textContent=active?fmt(Math.round(total/active)):'0h 00m';
+$('#sBus').textContent=max>0?DAYF[days.indexOf(max)]:'None';
+var names=Object.keys(pj).sort(function(a,b){return pj[b]-pj[a]});
+$('#sTop').textContent=names.length?names[0]:'None';
+var today=ymd(new Date());
+$('#bars').innerHTML=days.map(function(d,i){return '<div class="bar'+(d?'':' z')+'" style="height:'+(max?Math.max(3,Math.round(d/max*100)):3)+'%" title="'+DAYF[i]+': '+fmt(d)+'"></div>'}).join('');
+$('#days').innerHTML=days.map(function(d,i){return '<span'+(ymd(addDays(wk,i))===today?' class="td"':'')+'>'+DAY[i]+'</span>'}).join('');
+$('#pj').innerHTML=names.map(function(n){return '<li><span>'+esc(n)+'</span><b>'+fmt(pj[n])+'</b></li>'}).join('');
+list.sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:b.ts-a.ts});
+$('#hist').innerHTML=list.map(function(e){
+return '<li><div><b>'+esc(e.what||'No description')+'</b><small>'+esc(short(e.date))+' &middot; '+esc(pname(e))+' &middot; '+(e.source==='timer'?'timer':'manual')+'</small><div class="acts"><button data-edit="'+e.id+'">Edit</button><button data-del="'+e.id+'">Delete</button></div></div><div class="amt">'+fmt(e.min)+'</div></li>'}).join('')||'<li class="mut">'+(S.entries.length?'Nothing logged this week.':'No entries yet. Add your first one above.')+'</li>'}
+
+$('#hist').onclick=function(ev){
+var a=ev.target.getAttribute('data-edit'),d=ev.target.getAttribute('data-del');
+if(d&&confirm('Delete this entry?')){S.entries=S.entries.filter(function(e){return e.id!==d});save();render()}
+if(a){var e=S.entries.filter(function(x){return x.id===a})[0];if(!e)return;
+showTab('add');editId=a;
+$('#what').value=e.what||'';$('#proj').value=e.proj||'';$('#date').value=e.date;$('#err').textContent='';
+if(e.from&&e.to){setMode(true);$('#from').value=e.from;$('#to').value=e.to;$('#len').value=''}
+else{setMode(false);$('#len').value=fmt(e.min)}
+$('#saveBtn').textContent='Save changes';$('#cancelEdit').hidden=false;
+window.scrollTo({top:0,behavior:'smooth'});$('#what').focus()}};
+
+/* export and copy */
+function cell(v,text){v=String(v==null?'':v);if(text&&/^[=+\-@\t\r]/.test(v))v="'"+v;return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+$('#exp').onclick=function(){
+var rows=[['Date','Project','What','Hours','Duration','Source']];
+S.entries.slice().sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:a.ts-b.ts}).forEach(function(e){rows.push([e.date,e.proj||'',e.what||'',(e.min/60).toFixed(2),fmt(e.min),e.source||'manual'])});
+var txt='\ufeff'+rows.map(function(r,ri){return r.map(function(c,ci){return cell(c,ri>0&&(ci===1||ci===2))}).join(',')}).join('\r\n');
+var u=URL.createObjectURL(new Blob([txt],{type:'text/csv;charset=utf-8'})),l=document.createElement('a');
+l.href=u;l.download='timesheet-'+ymd(new Date())+'.csv';document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},1000)};
+
+$('#copy').onclick=function(){
+var list=weekEntries().sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:a.ts-b.ts}),tot=0;
+var lines=list.map(function(e){tot+=e.min;return short(e.date)+': '+(e.what||'No description')+(e.proj?' ('+e.proj+')':'')+', '+fmt(e.min)});
+var txt='Timesheet, '+$('#wlab').textContent+'\n'+(lines.length?lines.join('\n'):'Nothing logged.')+'\nTotal: '+fmt(tot);
+var btn=$('#copy'),done=function(){btn.textContent='Copied';setTimeout(function(){btn.textContent='Copy week as text'},1500)};
+if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,function(){prompt('Copy this text:',txt)});
+else{var t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();try{document.execCommand('copy');done()}catch(e){prompt('Copy this text:',txt)}t.remove()}};
+
+if(S.timer)showTab('timer');
+renderTimer();render();
+})();
+</script>
+</body>
+</html>

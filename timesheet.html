@@ -82,15 +82,12 @@ ul{list-style:none;margin:0;padding:0}
 <label>What was it<input id="what" maxlength="80" placeholder="e.g. Drive to client"></label>
 <label>Project (optional)<input id="proj" list="projs" maxlength="40" placeholder="e.g. Client A"></label>
 <datalist id="projs"></datalist>
-<div class="two">
 <label>Date<input id="date" type="date"></label>
-<label id="lenL">Length<input id="len" placeholder="1h 20m" autocomplete="off"></label>
-</div>
-<div class="two" id="seL" hidden>
+<div class="two">
 <label>From<input id="from" type="time"></label>
 <label>To<input id="to" type="time"></label>
 </div>
-<p class="help"><button type="button" class="link" id="mode">Use start and end time instead</button> &middot; Try 1h 20m, 1:20 or 45m.</p>
+<p class="help" id="dur">Pick a start and end time.</p>
 <p id="err" role="alert"></p>
 <div class="row"><button class="btn" type="submit" id="saveBtn">Save entry</button><button type="button" class="ghost" id="cancelEdit" hidden>Cancel</button></div>
 </form>
@@ -152,18 +149,17 @@ function fmt(m){var h=Math.floor(m/60),r=m%60;return h+'h '+(r<10?'0':'')+r+'m'}
 function short(s){return pd(s).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}
 function tmin(s){var p=(s||'').split(':');return p.length===2?(+p[0])*60+(+p[1]):NaN}
 
-function parseLen(s){
-s=String(s).trim().toLowerCase().replace(',','.');
-if(!s)return NaN;
-var m=s.match(/^(\d+):(\d{1,2})$/);
-if(m)return (+m[1])*60+(+m[2]);
-m=s.match(/^(?:(\d+(?:\.\d+)?)\s*h(?:ours?|rs?)?)?\s*(?:(\d+)\s*m(?:in(?:ute)?s?)?)?$/);
-if(m&&(m[1]||m[2]))return Math.round((parseFloat(m[1])||0)*60+(+m[2]||0));
-if(/^\d+\.\d+$/.test(s))return Math.round(parseFloat(s)*60);
-if(/^\d+$/.test(s))return +s;
-return NaN}
+function hmm(m){m=((m%1440)+1440)%1440;var h=Math.floor(m/60),r=m%60;return (h<10?'0':'')+h+':'+(r<10?'0':'')+r}
+function span(){
+var a=tmin($('#from').value),b=tmin($('#to').value);
+if(isNaN(a)||isNaN(b))return null;
+if(a===b)return 0;
+return b>a?b-a:b+1440-a}
+function updateDur(){
+var m=span();
+$('#dur').textContent=m===null?'Pick a start and end time.':m===0?'Start and end can\u2019t be the same time.':fmt(m)+(tmin($('#to').value)<tmin($('#from').value)?' (ends the next day)':'')}
 
-var wk=wstart(new Date()),editId=null,useSE=false;
+var wk=wstart(new Date()),editId=null;
 
 /* tabs */
 function showTab(t){
@@ -174,9 +170,8 @@ $('#tabAdd').onclick=function(){showTab('add')};
 $('#tabTimer').onclick=function(){showTab('timer')};
 
 /* add time form */
-function setMode(on){useSE=on;$('#seL').hidden=!on;$('#lenL').hidden=on;$('#mode').textContent=on?'Use a length instead':'Use start and end time instead'}
-$('#mode').onclick=function(){setMode(!useSE)};
-function resetForm(){editId=null;$('#what').value='';$('#len').value='';$('#from').value='';$('#to').value='';$('#err').textContent='';$('#saveBtn').textContent='Save entry';$('#cancelEdit').hidden=true;setMode(false)}
+$('#from').oninput=$('#to').oninput=updateDur;
+function resetForm(){editId=null;$('#what').value='';$('#from').value='';$('#to').value='';$('#err').textContent='';$('#saveBtn').textContent='Save entry';$('#cancelEdit').hidden=true;updateDur()}
 $('#cancelEdit').onclick=function(){resetForm()};
 $('#date').value=ymd(new Date());
 
@@ -185,16 +180,10 @@ ev.preventDefault();
 var err=function(m){$('#err').textContent=m};
 var date=$('#date').value;
 if(!date)return err('Pick a date.');
-var mins;
-if(useSE){
-var a=tmin($('#from').value),b=tmin($('#to').value);
-if(isNaN(a)||isNaN(b))return err('Add both a start and an end time.');
-mins=b-a;if(mins<=0)mins+=1440}
-else{mins=parseLen($('#len').value);
-if(isNaN(mins)||mins<=0)return err('Enter a length like 1h 20m, 1:20 or 45m.')}
-if(mins>1440)return err('An entry can\u2019t be longer than 24 hours.');
-var e={id:editId||uid(),date:date,what:$('#what').value.trim(),proj:$('#proj').value.trim(),min:mins,source:'manual',ts:Date.now()};
-if(useSE){e.from=$('#from').value;e.to=$('#to').value}
+var mins=span();
+if(mins===null)return err('Add both a start and an end time.');
+if(mins===0)return err('Start and end can\u2019t be the same time.');
+var e={id:editId||uid(),date:date,what:$('#what').value.trim(),proj:$('#proj').value.trim(),min:mins,source:'manual',from:$('#from').value,to:$('#to').value,ts:Date.now()};
 if(editId){var old=S.entries.filter(function(x){return x.id===editId})[0];if(old)e.source=old.source||'manual';S.entries=S.entries.map(function(x){return x.id===editId?e:x})}
 else S.entries.push(e);
 save();wk=wstart(pd(date));
@@ -220,7 +209,9 @@ tick()}
 $('#tbtn').onclick=function(){
 if(!S.timer){S.timer={start:Date.now(),what:$('#twhat').value.trim(),proj:$('#tproj').value.trim()};save();renderTimer();return}
 var st=new Date(S.timer.start),mins=Math.max(1,Math.round((Date.now()-S.timer.start)/60000));
-S.entries.push({id:uid(),date:ymd(st),what:S.timer.what,proj:S.timer.proj,min:mins,source:'timer',ts:Date.now()});
+var en=new Date(),te={id:uid(),date:ymd(st),what:S.timer.what,proj:S.timer.proj,min:mins,source:'timer',ts:Date.now()};
+if(mins<1440){te.from=hmm(st.getHours()*60+st.getMinutes());te.to=hmm(en.getHours()*60+en.getMinutes())}
+S.entries.push(te);
 S.timer=null;$('#twhat').value='';
 save();wk=wstart(st);renderTimer();render()};
 $('#tdisc').onclick=function(){if(confirm('Discard the running timer without saving it?')){S.timer=null;save();renderTimer()}};
@@ -261,8 +252,9 @@ if(d&&confirm('Delete this entry?')){S.entries=S.entries.filter(function(e){retu
 if(a){var e=S.entries.filter(function(x){return x.id===a})[0];if(!e)return;
 showTab('add');editId=a;
 $('#what').value=e.what||'';$('#proj').value=e.proj||'';$('#date').value=e.date;$('#err').textContent='';
-if(e.from&&e.to){setMode(true);$('#from').value=e.from;$('#to').value=e.to;$('#len').value=''}
-else{setMode(false);$('#len').value=fmt(e.min)}
+var f=e.from,t=e.to;
+if(!f||!t){f='08:00';t=hmm(480+e.min)}
+$('#from').value=f;$('#to').value=t;updateDur();
 $('#saveBtn').textContent='Save changes';$('#cancelEdit').hidden=false;
 window.scrollTo({top:0,behavior:'smooth'});$('#what').focus()}};
 
@@ -284,7 +276,7 @@ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeT
 else{var t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();try{document.execCommand('copy');done()}catch(e){prompt('Copy this text:',txt)}t.remove()}};
 
 if(S.timer)showTab('timer');
-renderTimer();render();
+updateDur();renderTimer();render();
 })();
 </script>
 </body>

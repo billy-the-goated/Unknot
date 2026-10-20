@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Easily Uncomplicated: Simple on purpose.</title>
-<meta name="description" content="Free, ad-free apps that make things that feel complicated simple. Starting with Tracks, a simple way to see where your money goes.">
+<meta name="description" content="Free, ad-free apps that make things that feel complicated simple. Starting with Tracks, a simple way to see where your money goes, and Timesheet, a simple way to see where your hours go.">
 <meta name="theme-color" content="#1E4BD2">
 <meta property="og:title" content="Easily Uncomplicated: Simple on purpose.">
 <meta property="og:description" content="Free, ad-free apps that make complicated things simple.">
@@ -133,6 +133,7 @@ a{color:var(--blue)}
       <h2 class="section" id="apps-title">Our apps</h2>
       <div class="tabs" role="tablist" aria-label="Apps">
         <button class="tab" role="tab" id="tab-tracks" aria-selected="true" aria-controls="panel-tracks">Tracks</button>
+        <button class="tab" role="tab" id="tab-timesheet" aria-selected="false" aria-controls="panel-timesheet" tabindex="-1">Timesheet</button>
         <button class="tab" role="tab" id="tab-next" aria-selected="false" aria-controls="panel-next" tabindex="-1">Next app</button>
       </div>
 
@@ -161,6 +162,29 @@ a{color:var(--blue)}
         </figure>
       </div>
 
+      <div class="panel has-preview" role="tabpanel" id="panel-timesheet" aria-labelledby="tab-timesheet" hidden>
+        <div>
+          <h3>Timesheet</h3>
+          <p>See where your hours go. Add time by hand, like a drive to a client, or use the timer when you want it. Your week adds itself up.</p>
+          <ul class="points">
+            <li>Add time by hand or start a timer</li>
+            <li>See your total, average and busiest day</li>
+            <li>Export to a spreadsheet or copy the week as text</li>
+          </ul>
+          <a class="btn" href="timesheet.html">Open Timesheet</a>
+          <p class="note">This is the first version. <a href="mailto:aldenesterhuizen1@gmail.com?subject=Feedback%20on%20Timesheet">Tell us</a> what would make it better.</p>
+        </div>
+        <figure class="preview" aria-label="Preview of the Timesheet app">
+          <div class="pv-head"><b>This week</b><span>19h 40m</span></div>
+          <dl class="pv-list">
+            <div class="pv-row"><dt>Client A</dt><dd>7h 25m</dd></div>
+            <div class="pv-row"><dt>Website redesign</dt><dd>12h 15m</dd></div>
+          </dl>
+          <div class="pv-tx"><div>Drive to client<small>Client A, Tue, manual</small></div><div>1h 20m</div></div>
+          <figcaption>A preview of the app. Details may change.</figcaption>
+        </figure>
+      </div>
+
       <div class="panel" role="tabpanel" id="panel-next" aria-labelledby="tab-next" hidden>
         <div>
           <h3>What should we simplify next?</h3>
@@ -174,7 +198,7 @@ a{color:var(--blue)}
       <h2 id="promise-title" class="section" style="margin:0 0 22px;font-size:1.05rem;font-weight:500;color:var(--muted)">Our promise</h2>
       <ul>
         <li><strong>Free, with no ads</strong><span>No payments, no adverts, no catch.</span></li>
-        <li><strong>Your data stays yours</strong><span>Tracks keeps everything on your own device.</span></li>
+        <li><strong>Your data stays yours</strong><span>Tracks and Timesheet keep everything on your own device.</span></li>
         <li><strong>Take it with you</strong><span>Export everything, any time you like.</span></li>
       </ul>
     </section>
